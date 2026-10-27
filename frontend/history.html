@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>History - AI Study Assistant</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css?v=2" />
+</head>
+<body>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <span class="sidebar-brand">AI Study Assistant</span>
+      <button class="sidebar-toggle" type="button" onclick="toggleSidebar()" aria-label="Collapse sidebar">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <line x1="3" y1="12" x2="21" y2="12"/>
+          <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    <a href="index.html" class="new-chat-btn" style="text-decoration: none;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19"/>
+        <line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+      New chat
+    </a>
+
+    <div class="sessions-label">Recent</div>
+    <div class="sessions-list" id="sessionsList">
+      <div class="sessions-empty">No conversations yet</div>
+    </div>
+
+    <div class="sidebar-footer">
+      <button class="sidebar-link" type="button" onclick="toggleTheme()">
+        <svg id="themeIconMoon" class="toggle-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+        <svg id="themeIconSun" class="toggle-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: block;">
+          <circle cx="12" cy="12" r="4"/>
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+        </svg>
+        <span id="themeLabel">Light mode</span>
+      </button>
+
+      <a href="dashboard.html" class="sidebar-link">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="20" x2="18" y2="10"/>
+          <line x1="12" y1="20" x2="12" y2="4"/>
+          <line x1="6" y1="20" x2="6" y2="14"/>
+        </svg>
+        Dashboard
+      </a>
+
+      <a href="history.html" class="sidebar-link" style="background: var(--accent-muted); color: var(--text-primary);">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+          <path d="M3 3v5h5"/>
+          <path d="M12 7v5l4 2"/>
+        </svg>
+        History
+      </a>
+
+      <button class="sidebar-link danger" type="button" onclick="logout()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        Logout
+      </button>
+    </div>
+  </aside>
+
+  <main class="main-area">
+    <div class="top-bar">
+      <div class="top-bar-left">
+        <button class="sidebar-open-btn" type="button" onclick="toggleSidebar()" aria-label="Open sidebar">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <line x1="3" y1="12" x2="21" y2="12"/>
+            <line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+        </button>
+        <div>
+          <div class="page-title">History</div>
+          <div class="page-subtitle">Your conversation history</div>
+        </div>
+      </div>
+      <div class="top-bar-right">
+        <span class="user-badge" id="navUsername">User</span>
+      </div>
+    </div>
+
+    <div class="history-container">
+      <div class="history-list">
+        <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+          <input
+            type="text"
+            id="searchInput"
+            class="chat-input"
+            placeholder="Search conversations..."
+            oninput="filterHistory()"
+            style="flex: 1;"
+          />
+          <button class="send-btn" type="button" onclick="clearHistory()" style="background: var(--danger);">
+            Clear all
+          </button>
+        </div>
+
+        <div id="historyList">
+          <div class="history-empty">Loading your conversation history...</div>
+        </div>
+
+        <div id="pagination" style="display: flex; justify-content: center; gap: 6px; margin-top: 16px;"></div>
+      </div>
+    </div>
+  </main>
+
+  <script src="script.js?v=2"></script>
+  <script>
+    // API_URL is defined in script.js - do NOT redeclare it here.
+
+    let allHistory = [];
+    let currentPage = 1;
+    const pageSize = 10;
+
+    async function loadSessions() {
+      const userId = localStorage.getItem('userId');
+      if (!userId) return;
+      const list = document.getElementById('sessionsList');
+      if (!list) return;
+
+      try {
+        const res = await fetch(`${API_URL}/api/sessions/${userId}`);
+        const sessions = await res.json();
+        if (!sessions.length) {
+          list.innerHTML = '<div class="sessions-empty">No conversations yet</div>';
+          return;
+        }
+        list.innerHTML = '';
+        sessions.slice(0, 20).forEach((session) => {
+          const item = document.createElement('a');
+          item.className = 'session-item';
+          item.href = 'index.html';
+          item.style.textDecoration = 'none';
+
+          const title = document.createElement('span');
+          title.className = 'session-title';
+          title.textContent = session.title || 'Untitled';
+
+          item.appendChild(title);
+          item.addEventListener('click', () => {
+            localStorage.setItem('currentSessionId', session.session_id);
+          });
+          list.appendChild(item);
+        });
+      } catch (err) {
+        console.error('Load sessions failed:', err);
+      }
+    }
+
+    async function loadHistory(page = 1) {
+      const userId = localStorage.getItem('userId');
+      const token = localStorage.getItem('token');
+      currentPage = page;
+
+      try {
+        const response = await fetch(`${API_URL}/api/history/${userId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!response.ok) throw new Error('Failed to load history');
+        allHistory = await response.json();
+        renderHistory(page);
+      } catch (error) {
+        document.getElementById('historyList').innerHTML =
+          '<div class="history-empty">Could not load history. Start chatting to save conversations.</div>';
+        document.getElementById('pagination').innerHTML = '';
+      }
+    }
+
+    function renderHistory(page) {
+      const list = document.getElementById('historyList');
+
+      if (allHistory.length === 0) {
+        list.innerHTML = '<div class="history-empty">No conversation history yet.</div>';
+        document.getElementById('pagination').innerHTML = '';
+        return;
+      }
+
+      const start = (page - 1) * pageSize;
+      const end = start + pageSize;
+      const pageItems = allHistory.slice(start, end);
+
+      let html = '';
+      pageItems.forEach(item => {
+        const time = new Date(item.timestamp).toLocaleString();
+        const status = item.is_answered ? 'Answered' : 'Unanswered';
+
+        html += `
+          <div class="history-item">
+            <div class="history-item-header">
+              <span class="history-item-query">${escapeHtml(item.query)}</span>
+              <span class="history-item-time">${time}</span>
+            </div>
+            <div class="history-item-response">${escapeHtml((item.response || '').substring(0, 200))}${(item.response || '').length > 200 ? '...' : ''}</div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+              <span class="history-item-intent">${item.intent || 'Unknown'} / ${status}</span>
+              <button class="session-delete" type="button" onclick="deleteConversation(${item.id})" style="opacity:1;" aria-label="Delete">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        `;
+      });
+
+      list.innerHTML = html;
+
+      const totalPages = Math.ceil(allHistory.length / pageSize);
+      let paginationHtml = '';
+      for (let i = 1; i <= Math.min(totalPages, 5); i++) {
+        const active = i === page;
+        paginationHtml += `<button class="quick-btn" style="${active ? 'background:var(--accent);color:#fff;border-color:var(--accent);' : ''}" onclick="loadHistory(${i})">${i}</button>`;
+      }
+      document.getElementById('pagination').innerHTML = paginationHtml;
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text == null ? '' : text;
+      return div.innerHTML;
+    }
+
+    function filterHistory() {
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const filtered = allHistory.filter(item =>
+        (item.query || '').toLowerCase().includes(search) ||
+        (item.response || '').toLowerCase().includes(search)
+      );
+      const list = document.getElementById('historyList');
+
+      if (filtered.length === 0) {
+        list.innerHTML = '<div class="history-empty">No matching conversations found.</div>';
+        return;
+      }
+
+      let html = '';
+      filtered.slice(0, 10).forEach(item => {
+        const time = new Date(item.timestamp).toLocaleString();
+        const status = item.is_answered ? 'Answered' : 'Unanswered';
+
+        html += `
+          <div class="history-item">
+            <div class="history-item-header">
+              <span class="history-item-query">${escapeHtml(item.query)}</span>
+              <span class="history-item-time">${time}</span>
+            </div>
+            <div class="history-item-response">${escapeHtml((item.response || '').substring(0, 200))}${(item.response || '').length > 200 ? '...' : ''}</div>
+            <span class="history-item-intent">${item.intent || 'Unknown'} / ${status}</span>
+          </div>
+        `;
+      });
+      list.innerHTML = html;
+    }
+
+    async function deleteConversation(id) {
+      if (!confirm('Delete this conversation?')) return;
+      const userId = localStorage.getItem('userId');
+      const token = localStorage.getItem('token');
+
+      try {
+        await fetch(`${API_URL}/api/history/${userId}/${id}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        loadHistory(currentPage);
+      } catch (error) {
+        alert('Failed to delete conversation');
+      }
+    }
+
+    async function clearHistory() {
+      if (!confirm('Clear ALL conversation history?')) return;
+      const userId = localStorage.getItem('userId');
+      const token = localStorage.getItem('token');
+
+      try {
+        await fetch(`${API_URL}/api/history/${userId}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        allHistory = [];
+        renderHistory(1);
+      } catch (error) {
+        alert('Failed to clear history');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const token = localStorage.getItem('token');
+      const username = localStorage.getItem('username');
+      if (!token) {
+        window.location.href = 'login.html';
+        return;
+      }
+      document.getElementById('navUsername').textContent = username || 'User';
+
+      if (typeof updateThemeToggleIcon === 'function') updateThemeToggleIcon();
+
+      loadSessions();
+      loadHistory(1);
+    });
+  </script>
+</body>
+</html>

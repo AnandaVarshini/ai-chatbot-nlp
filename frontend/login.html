@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign in - AI Study Assistant</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css?v=2" />
+</head>
+<body>
+
+  <div class="login-wrapper" id="loginWrapper">
+    <div class="login-card">
+      <div class="login-brand">AI Study Assistant</div>
+      <div class="login-subtitle">Sign in to continue</div>
+
+      <div class="form-error" id="formError"></div>
+
+      <form id="loginForm" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label class="form-label" for="username">Username</label>
+          <input
+            type="text"
+            id="username"
+            class="form-input"
+            placeholder="Enter your username"
+            autocomplete="username"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="password">Password</label>
+          <input
+            type="password"
+            id="password"
+            class="form-input"
+            placeholder="Enter your password"
+            autocomplete="current-password"
+            required
+          />
+        </div>
+
+        <button type="submit" class="btn-primary" id="loginBtn">Sign in</button>
+      </form>
+
+      <div class="form-footer">
+        Don't have an account? <a href="#" onclick="switchToRegister(); return false;">Create one</a>
+      </div>
+
+      <div class="form-footer" style="margin-top: 8px; font-size: 12px;">
+        <a href="privacy.html">Privacy</a>
+        <span style="color: var(--text-muted); margin: 0 6px;">/</span>
+        <a href="terms.html">Terms</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="login-wrapper hidden" id="registerWrapper">
+    <div class="login-card">
+      <div class="login-brand">AI Study Assistant</div>
+      <div class="login-subtitle">Create your account</div>
+
+      <div class="form-error" id="registerError"></div>
+
+      <form id="registerForm" onsubmit="handleRegister(event)">
+        <div class="form-group">
+          <label class="form-label" for="regUsername">Username</label>
+          <input
+            type="text"
+            id="regUsername"
+            class="form-input"
+            placeholder="Choose a username"
+            autocomplete="username"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="regEmail">Email</label>
+          <input
+            type="email"
+            id="regEmail"
+            class="form-input"
+            placeholder="you@example.com"
+            autocomplete="email"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="regPassword">Password</label>
+          <input
+            type="password"
+            id="regPassword"
+            class="form-input"
+            placeholder="At least 6 characters"
+            autocomplete="new-password"
+            minlength="6"
+            required
+          />
+        </div>
+
+        <button type="submit" class="btn-primary" id="registerBtn">Create account</button>
+      </form>
+
+      <div class="form-footer">
+        Already have an account? <a href="#" onclick="switchToLogin(); return false;">Sign in</a>
+      </div>
+
+      <div class="form-footer" style="margin-top: 8px; font-size: 12px;">
+        <a href="privacy.html">Privacy</a>
+        <span style="color: var(--text-muted); margin: 0 6px;">/</span>
+        <a href="terms.html">Terms</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js?v=2"></script>
+  <script>
+    // API_URL is defined in script.js - do NOT redeclare it here.
+
+    function showError(elId, message) {
+      const el = document.getElementById(elId);
+      el.textContent = message;
+      el.classList.add('visible');
+    }
+
+    function hideError(elId) {
+      const el = document.getElementById(elId);
+      el.textContent = '';
+      el.classList.remove('visible');
+    }
+
+    function switchToRegister() {
+      document.getElementById('loginWrapper').classList.add('hidden');
+      document.getElementById('registerWrapper').classList.remove('hidden');
+    }
+
+    function switchToLogin() {
+      document.getElementById('registerWrapper').classList.add('hidden');
+      document.getElementById('loginWrapper').classList.remove('hidden');
+    }
+
+    async function handleLogin(event) {
+      event.preventDefault();
+      hideError('formError');
+
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+      const btn = document.getElementById('loginBtn');
+
+      btn.disabled = true;
+      btn.textContent = 'Signing in...';
+
+      try {
+        const res = await fetch(`${API_URL}/api/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.detail || 'Invalid credentials');
+        }
+
+        const data = await res.json();
+        localStorage.setItem('token', data.access_token);
+        localStorage.setItem('userId', data.user_id);
+        localStorage.setItem('username', data.username);
+        localStorage.setItem('email', data.email || '');
+
+        window.location.href = 'index.html';
+      } catch (err) {
+        showError('formError', err.message);
+        btn.disabled = false;
+        btn.textContent = 'Sign in';
+      }
+    }
+
+    async function handleRegister(event) {
+      event.preventDefault();
+      hideError('registerError');
+
+      const username = document.getElementById('regUsername').value.trim();
+      const email = document.getElementById('regEmail').value.trim();
+      const password = document.getElementById('regPassword').value;
+      const btn = document.getElementById('registerBtn');
+
+      btn.disabled = true;
+      btn.textContent = 'Creating account...';
+
+      try {
+        const res = await fetch(`${API_URL}/api/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, email, password })
+        });
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.detail || 'Registration failed');
+        }
+
+        const data = await res.json();
+        localStorage.setItem('token', data.access_token);
+        localStorage.setItem('userId', data.user_id);
+        localStorage.setItem('username', data.username);
+        localStorage.setItem('email', data.email || '');
+
+        window.location.href = 'index.html';
+      } catch (err) {
+        showError('registerError', err.message);
+        btn.disabled = false;
+        btn.textContent = 'Create account';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        window.location.href = 'index.html';
+      }
+    });
+  </script>
+</body>
+</html>

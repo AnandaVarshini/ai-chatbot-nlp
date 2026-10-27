@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>History - AI Study Assistant</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #0a0a1a;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .nav-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 25px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.05);
+            margin-bottom: 30px;
+        }
+        .nav-brand {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 20px;
+            color: white;
+            text-decoration: none;
+        }
+        .nav-brand i { color: #667eea; margin-right: 10px; }
+        .nav-links {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .nav-links a {
+            color: rgba(255,255,255,0.5);
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        .nav-links a:hover, .nav-links a.active {
+            color: white;
+            background: rgba(102,126,234,0.15);
+        }
+        .user-badge {
+            color: rgba(255,255,255,0.6);
+            font-size: 14px;
+            padding: 6px 14px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .logout-link {
+            color: #ff4757 !important;
+            cursor: pointer;
+        }
+        .logout-link:hover { background: rgba(255,71,87,0.15) !important; }
+        h1 { color: white; font-family: 'Orbitron', sans-serif; font-size: 24px; margin-bottom: 5px; }
+        .subtitle { color: rgba(255,255,255,0.4); margin-bottom: 25px; }
+        .history-controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .history-controls input {
+            flex: 1;
+            min-width: 200px;
+            padding: 12px 18px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            color: white;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+        }
+        .history-controls input::placeholder { color: rgba(255,255,255,0.3); }
+        .history-controls input:focus {
+            border-color: #667eea;
+            outline: none;
+        }
+        .clear-btn {
+            padding: 12px 24px;
+            background: rgba(255,71,87,0.15);
+            border: 1px solid rgba(255,71,87,0.3);
+            border-radius: 12px;
+            color: #ff4757;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .clear-btn:hover { background: rgba(255,71,87,0.25); }
+        .history-list { display: flex; flex-direction: column; gap: 12px; }
+        .history-item {
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            padding: 16px 20px;
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: all 0.3s;
+        }
+        .history-item:hover { border-color: rgba(102,126,234,0.2); }
+        .history-item .h-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+        .history-item .h-query { color: white; font-weight: 600; font-size: 15px; }
+        .history-item .h-meta {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            font-size: 12px;
+            color: rgba(255,255,255,0.4);
+        }
+        .history-item .h-meta .intent-tag {
+            background: rgba(102,126,234,0.15);
+            padding: 2px 12px;
+            border-radius: 12px;
+            color: #667eea;
+            font-size: 11px;
+        }
+        .history-item .h-answer {
+            color: rgba(255,255,255,0.6);
+            font-size: 14px;
+            margin-top: 6px;
+            padding-left: 10px;
+            border-left: 2px solid #667eea;
+        }
+        .history-item .h-answer .answered { color: #00ff88; }
+        .history-item .h-answer .unanswered { color: #ffa502; }
+        .delete-btn {
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.2);
+            cursor: pointer;
+            transition: color 0.3s;
+            font-size: 14px;
+        }
+        .delete-btn:hover { color: #ff4757; }
+        .no-history {
+            color: rgba(255,255,255,0.3);
+            text-align: center;
+            padding: 40px;
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .pagination button {
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: rgba(255,255,255,0.5);
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.3s;
+        }
+        .pagination button:hover {
+            background: rgba(102,126,234,0.15);
+            color: white;
+        }
+        @media (max-width: 768px) {
+            .nav-bar { flex-wrap: wrap; gap: 10px; padding: 12px 15px; }
+            .nav-links { gap: 8px; }
+            .nav-links a { font-size: 12px; padding: 5px 10px; }
+            .history-controls { flex-direction: column; }
+            .history-controls input { width: 100%; min-width: unset; }
+            .clear-btn { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="nav-bar">
+            <a href="index.html" class="nav-brand"><i class="fas fa-robot"></i> AI Assistant</a>
+            <div class="nav-links">
+                <a href="index.html"><i class="fas fa-comment"></i> Chat</a>
+                <a href="dashboard.html"><i class="fas fa-chart-pie"></i> Dashboard</a>
+                <a href="history.html" class="active"><i class="fas fa-history"></i> History</a>
+                <span class="user-badge"><i class="fas fa-user-circle"></i> <span id="navUsername">User</span></span>
+                <a class="logout-link" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+        </div>
+
+        <h1><i class="fas fa-history" style="color:#667eea;"></i> Chat History</h1>
+        <p class="subtitle">Your conversation history with the AI assistant</p>
+
+        <div class="history-controls">
+            <input type="text" id="searchInput" placeholder="Search conversations..." onkeyup="filterHistory()" />
+            <button class="clear-btn" onclick="clearHistory()"><i class="fas fa-trash"></i> Clear All</button>
+        </div>
+
+        <div class="history-list" id="historyList">
+            <div class="no-history">Loading your conversation history...</div>
+        </div>
+
+        <div class="pagination" id="pagination">
+            <button onclick="loadHistory(1)">1</button>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://127.0.0.1:8080';
+        let allHistory = [];
+        let currentPage = 1;
+        const pageSize = 10;
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'login.html';
+        }
+
+        function checkAuth() {
+            const token = localStorage.getItem('token');
+            const username = localStorage.getItem('username');
+            if (!token) {
+                window.location.href = 'login.html';
+                return false;
+            }
+            document.getElementById('navUsername').textContent = username || 'User';
+            return true;
+        }
+
+        async function loadHistory(page = 1) {
+            const userId = localStorage.getItem('userId');
+            const token = localStorage.getItem('token');
+            currentPage = page;
+
+            try {
+                const response = await fetch(`${API_URL}/api/history/${userId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!response.ok) throw new Error('Failed to load history');
+
+                allHistory = await response.json();
+                renderHistory(page);
+            } catch (error) {
+                document.getElementById('historyList').innerHTML = `
+                    <div class="no-history">
+                        <i class="fas fa-cloud-download-alt" style="font-size: 32px; display: block; margin-bottom: 10px;"></i>
+                        Could not load history. Start chatting to save conversations!
+                    </div>
+                `;
+                document.getElementById('pagination').innerHTML = '';
+            }
+        }
+
+        function renderHistory(page) {
+            const list = document.getElementById('historyList');
+            
+            if (allHistory.length === 0) {
+                list.innerHTML = `
+                    <div class="no-history">
+                        <i class="fas fa-inbox" style="font-size: 32px; display: block; margin-bottom: 10px;"></i>
+                        No conversation history yet. Start chatting with the AI!
+                    </div>
+                `;
+                document.getElementById('pagination').innerHTML = '';
+                return;
+            }
+
+            const start = (page - 1) * pageSize;
+            const end = start + pageSize;
+            const pageItems = allHistory.slice(start, end);
+
+            let html = '';
+            pageItems.forEach(item => {
+                const status = item.is_answered ? '✅ Answered' : '❌ Unanswered';
+                const statusClass = item.is_answered ? 'answered' : 'unanswered';
+                const time = new Date(item.timestamp).toLocaleString();
+                
+                html += `
+                    <div class="history-item">
+                        <div class="h-top">
+                            <span class="h-query">${escapeHtml(item.query)}</span>
+                            <button class="delete-btn" onclick="deleteConversation(${item.id})">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="h-meta">
+                            <span class="intent-tag">${item.intent || 'Unknown'}</span>
+                            <span>${time}</span>
+                            <span class="${statusClass}">${status}</span>
+                        </div>
+                        <div class="h-answer">
+                            ${escapeHtml(item.response.substring(0, 200))}${item.response.length > 200 ? '...' : ''}
+                        </div>
+                    </div>
+                `;
+            });
+
+            list.innerHTML = html;
+
+            // Pagination
+            const totalPages = Math.ceil(allHistory.length / pageSize);
+            let paginationHtml = '';
+            for (let i = 1; i <= Math.min(totalPages, 5); i++) {
+                paginationHtml += `<button onclick="loadHistory(${i})" ${i === page ? 'style="background:rgba(102,126,234,0.3);color:white;"' : ''}>${i}</button>`;
+            }
+            document.getElementById('pagination').innerHTML = paginationHtml;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function filterHistory() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allHistory.filter(item => 
+                item.query.toLowerCase().includes(search) ||
+                item.response.toLowerCase().includes(search)
+            );
+            const list = document.getElementById('historyList');
+            
+            if (filtered.length === 0) {
+                list.innerHTML = '<div class="no-history">No matching conversations found.</div>';
+                return;
+            }
+
+            let html = '';
+            filtered.slice(0, 10).forEach(item => {
+                const status = item.is_answered ? '✅ Answered' : '❌ Unanswered';
+                const statusClass = item.is_answered ? 'answered' : 'unanswered';
+                const time = new Date(item.timestamp).toLocaleString();
+                
+                html += `
+                    <div class="history-item">
+                        <div class="h-top">
+                            <span class="h-query">${escapeHtml(item.query)}</span>
+                        </div>
+                        <div class="h-meta">
+                            <span class="intent-tag">${item.intent || 'Unknown'}</span>
+                            <span>${time}</span>
+                            <span class="${statusClass}">${status}</span>
+                        </div>
+                        <div class="h-answer">${escapeHtml(item.response.substring(0, 200))}${item.response.length > 200 ? '...' : ''}</div>
+                    </div>
+                `;
+            });
+            list.innerHTML = html;
+        }
+
+        async function deleteConversation(id) {
+            if (!confirm('Delete this conversation?')) return;
+            const userId = localStorage.getItem('userId');
+            const token = localStorage.getItem('token');
+
+            try {
+                await fetch(`${API_URL}/api/history/${userId}/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                loadHistory(currentPage);
+            } catch (error) {
+                alert('Failed to delete conversation');
+            }
+        }
+
+        async function clearHistory() {
+            if (!confirm('Clear ALL conversation history?')) return;
+            const userId = localStorage.getItem('userId');
+            const token = localStorage.getItem('token');
+
+            try {
+                await fetch(`${API_URL}/api/history/${userId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                allHistory = [];
+                renderHistory(1);
+            } catch (error) {
+                alert('Failed to clear history');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!checkAuth()) return;
+            loadHistory(1);
+        });
+    </script>
+</body>
+</html>

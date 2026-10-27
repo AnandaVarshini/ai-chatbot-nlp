@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Study Assistant</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link rel="stylesheet" href="style.css" />
+    <style>
+        /* Navigation */
+        .nav-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 25px;
+            background: rgba(255,255,255,0.03);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            flex-shrink: 0;
+        }
+        .nav-bar .nav-brand {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 18px;
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .nav-bar .nav-brand i { color: #667eea; font-size: 22px; }
+        .nav-links {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .nav-links a {
+            color: rgba(255,255,255,0.5);
+            text-decoration: none;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.3s;
+        }
+        .nav-links a:hover, .nav-links a.active {
+            color: white;
+            background: rgba(102,126,234,0.15);
+        }
+        .nav-links a i { margin-right: 5px; }
+        .user-badge {
+            color: rgba(255,255,255,0.6);
+            font-size: 13px;
+            padding: 5px 12px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'Poppins', sans-serif;
+        }
+        .user-badge i { color: #667eea; }
+        .offline-badge {
+            display: none;
+            background: rgba(255,165,0,0.2);
+            color: #ffa502;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            border: 1px solid rgba(255,165,0,0.2);
+            font-family: 'Poppins', sans-serif;
+        }
+        .offline-badge.active { display: inline-block; }
+        .logout-link {
+            color: #ff4757 !important;
+            cursor: pointer;
+        }
+        .logout-link:hover { background: rgba(255,71,87,0.15) !important; }
+        .container { height: 95vh; max-width: 1000px; }
+        .chat-header {
+            padding: 15px 25px;
+            flex-shrink: 0;
+            background: transparent !important;
+        }
+        .chat-header h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 0;
+        }
+        .chat-header p {
+            color: rgba(255,255,255,0.4);
+            font-size: 13px;
+            margin: 0;
+        }
+        .quick-questions {
+            padding: 10px 25px 12px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            background: rgba(255,255,255,0.02);
+            border-top: 1px solid rgba(255,255,255,0.03);
+            flex-shrink: 0;
+        }
+        .quick-btn {
+            padding: 6px 14px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 16px;
+            color: rgba(255,255,255,0.6);
+            font-size: 11px;
+            font-family: 'Poppins', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .quick-btn:hover {
+            background: rgba(102,126,234,0.15);
+            border-color: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+        .quick-btn i { color: #667eea; font-size: 12px; }
+        .chat-footer {
+            padding: 12px 25px 18px;
+            background: rgba(255,255,255,0.02);
+            border-top: 1px solid rgba(255,255,255,0.03);
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        .chat-footer input {
+            flex: 1;
+            padding: 12px 18px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            color: white;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        .chat-footer input:focus {
+            border-color: #667eea;
+            outline: none;
+            box-shadow: 0 0 30px rgba(102,126,234,0.1);
+        }
+        .chat-footer input::placeholder { color: rgba(255,255,255,0.3); }
+        .chat-footer button {
+            padding: 12px 28px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .chat-footer button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px rgba(102,126,234,0.4);
+        }
+        .chat-footer button:active { transform: scale(0.95); }
+        .message-text {
+            line-height: 1.8;
+            font-size: 14px;
+            color: rgba(255,255,255,0.9);
+            white-space: pre-wrap;
+        }
+        .message.user .message-text { color: white; }
+        .highlight {
+            color: #667eea;
+            font-weight: 600;
+            background: rgba(102,126,234,0.15);
+            padding: 2px 8px;
+            border-radius: 6px;
+        }
+        @media (max-width: 768px) {
+            .container { height: 100vh; border-radius: 0; }
+            .nav-bar { flex-wrap: wrap; gap: 8px; padding: 10px 15px; }
+            .nav-links { gap: 5px; }
+            .nav-links a { font-size: 12px; padding: 4px 10px; }
+            .user-badge { font-size: 11px; padding: 3px 10px; }
+            .chat-header { padding: 12px 15px; }
+            .chat-header h1 { font-size: 17px; }
+            .chat-body { padding: 15px; }
+            .quick-questions { padding: 8px 15px 10px; gap: 5px; }
+            .quick-btn { font-size: 10px; padding: 4px 10px; }
+            .chat-footer { padding: 10px 15px 14px; flex-wrap: wrap; }
+            .chat-footer button { width: 100%; justify-content: center; }
+            .message-content { max-width: 85%; }
+        }
+    </style>
+</head>
+<body>
+    <div id="particles-js"></div>
+    <div class="cursor-glow"></div>
+    <div class="cursor-dot"></div>
+
+    <div class="container">
+        <div class="nav-bar">
+            <a href="index.html" class="nav-brand"><i class="fas fa-robot"></i> AI Assistant</a>
+            <div class="nav-links">
+                <a href="index.html" class="active"><i class="fas fa-comment"></i> Chat</a>
+                <a href="dashboard.html"><i class="fas fa-chart-pie"></i> Dashboard</a>
+                <a href="history.html"><i class="fas fa-history"></i> History</a>
+                <span class="user-badge"><i class="fas fa-user-circle"></i> <span id="navUsername">Guest</span></span>
+                <span class="offline-badge" id="offlineBadge"><i class="fas fa-wifi-slash"></i> Offline</span>
+                <a class="logout-link" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+        </div>
+
+        <div class="chat-header">
+            <h1><i class="fas fa-comment" style="color:#667eea; -webkit-text-fill-color:#667eea;"></i> AI Study Assistant</h1>
+            <p>Ask me about definitions, examples, images, and resources! 🚀</p>
+        </div>
+
+        <div class="chat-body" id="chatBody">
+            <div class="message bot">
+                <div class="avatar bot-avatar"><i class="fas fa-robot"></i></div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="sender">🤖 AI Assistant</span>
+                        <span class="time">Just now</span>
+                    </div>
+                    <div class="message-text">
+                        Hello! I'm your AI Study Assistant. 👋<br><br>
+                        I can help you with:<br>
+                        • 📖 Definitions: Ask <span class="highlight">"What is [topic]?"</span><br>
+                        • 💡 Examples: Ask <span class="highlight">"Give an example of [topic]?"</span><br>
+                        • 🌍 Real-world examples: Ask <span class="highlight">"Give a real-world example of [topic]?"</span><br>
+                        • 🖼️ Images: Ask <span class="highlight">"Show images of [topic]?"</span><br>
+                        • 📚 Resources: Ask <span class="highlight">"Where can I learn more about [topic]?"</span><br><br>
+                        Try asking me about AI, ML, NLP, Python, or databases! 🚀
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="quick-questions">
+            <button class="quick-btn" onclick="quickQuestion('What is artificial intelligence?')"><i class="fas fa-brain"></i> What is AI?</button>
+            <button class="quick-btn" onclick="quickQuestion('What is machine learning?')"><i class="fas fa-robot"></i> What is ML?</button>
+            <button class="quick-btn" onclick="quickQuestion('Give a real-world example of machine learning')"><i class="fas fa-globe"></i> Real-world ML</button>
+            <button class="quick-btn" onclick="quickQuestion('Show images of artificial intelligence')"><i class="fas fa-image"></i> AI Images</button>
+            <button class="quick-btn" onclick="quickQuestion('Where can I learn more about AI?')"><i class="fas fa-graduation-cap"></i> Learn AI</button>
+        </div>
+
+        <div class="chat-footer">
+            <input type="text" id="queryInput" placeholder="Ask me anything about AI, ML, NLP..." onkeypress="handleKeyPress(event)" />
+            <button onclick="sendQuery()"><i class="fas fa-paper-plane"></i> Send</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        let isOffline = false;
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.clear();
+                window.location.href = 'login.html';
+            }
+        }
+
+        function checkAuth() {
+            const token = localStorage.getItem('token');
+            const username = localStorage.getItem('username');
+            if (!token) {
+                window.location.href = 'login.html';
+                return false;
+            }
+            document.getElementById('navUsername').textContent = username || 'User';
+            return true;
+        }
+
+        function checkOffline() {
+            if (!navigator.onLine) {
+                isOffline = true;
+                document.getElementById('offlineBadge').classList.add('active');
+            } else {
+                isOffline = false;
+                document.getElementById('offlineBadge').classList.remove('active');
+            }
+        }
+
+        window.addEventListener('online', () => {
+            isOffline = false;
+            document.getElementById('offlineBadge').classList.remove('active');
+            addMessage('✅ You are back online!', false);
+        });
+
+        window.addEventListener('offline', () => {
+            isOffline = true;
+            document.getElementById('offlineBadge').classList.add('active');
+            addMessage('⚠️ You are offline. Using local knowledge base.', false);
+        });
+
+        function addMessage(text, isUser = false) {
+            const chatBody = document.getElementById('chatBody');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+            const avatar = document.createElement('div');
+            avatar.className = `avatar ${isUser ? '' : 'bot-avatar'}`;
+            avatar.innerHTML = isUser ? '<i class="fas fa-user"></i>' : '<i class="fas fa-robot"></i>';
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            const headerDiv = document.createElement('div');
+            headerDiv.className = 'message-header';
+            const sender = document.createElement('span');
+            sender.className = 'sender';
+            sender.textContent = isUser ? 'You' : '🤖 AI Assistant';
+            const time = document.createElement('span');
+            time.className = 'time';
+            time.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            headerDiv.appendChild(sender);
+            headerDiv.appendChild(time);
+            const textDiv = document.createElement('div');
+            textDiv.className = 'message-text';
+            textDiv.innerHTML = text.replace(/\n/g, '<br>');
+            contentDiv.appendChild(headerDiv);
+            contentDiv.appendChild(textDiv);
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(contentDiv);
+            chatBody.appendChild(messageDiv);
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+
+        function showTyping() {
+            const chatBody = document.getElementById('chatBody');
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message bot';
+            typingDiv.id = 'typingIndicator';
+            const avatar = document.createElement('div');
+            avatar.className = 'avatar bot-avatar';
+            avatar.innerHTML = '<i class="fas fa-robot"></i>';
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.innerHTML = `<div class="typing-indicator"><span></span><span></span><span></span></div>`;
+            typingDiv.appendChild(avatar);
+            typingDiv.appendChild(contentDiv);
+            chatBody.appendChild(typingDiv);
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+
+        function removeTyping() {
+            const typing = document.getElementById('typingIndicator');
+            if (typing) typing.remove();
+        }
+
+        const offlineKnowledge = [
+            { question: "what is artificial intelligence", answer: "Artificial Intelligence (AI) is the simulation of human intelligence processes by machines." },
+            { question: "what is machine learning", answer: "Machine Learning is a subset of AI that enables systems to learn from data." },
+            { question: "what is natural language processing", answer: "NLP is a branch of AI that helps computers understand human language." },
+            { question: "what is python", answer: "Python is a high-level programming language known for its simplicity." },
+            { question: "what is a database", answer: "A database is an organized collection of structured information." },
+            { question: "what is deep learning", answer: "Deep Learning is a subset of ML using neural networks with multiple layers." }
+        ];
+
+        function getOfflineResponse(query) {
+            const q = query.toLowerCase();
+            for (const entry of offlineKnowledge) {
+                if (q.includes(entry.question) || entry.question.includes(q)) {
+                    return entry.answer;
+                }
+            }
+            return "I'm offline and couldn't find an answer. Please connect to the internet for more responses!";
+        }
+
+        async function sendQuery() {
+            const input = document.getElementById('queryInput');
+            const query = input.value.trim();
+            if (!query) return;
+            addMessage(query, true);
+            input.value = '';
+            showTyping();
+            try {
+                const userId = localStorage.getItem('userId');
+                const token = localStorage.getItem('token');
+                let url = `${API_URL}/api/chat`;
+                if (userId && token) url = `${API_URL}/api/chat/${userId}`;
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': token ? `Bearer ${token}` : ''
+                    },
+                    body: JSON.stringify({ query })
+                });
+                if (!response.ok) throw new Error('Server error');
+                const data = await response.json();
+                removeTyping();
+                let responseText = data.response;
+                if (data.intent && data.intent !== 'Unknown') {
+                    responseText = `💡 Intent: ${data.intent}\n\n${responseText}`;
+                }
+                addMessage(responseText, false);
+            } catch (error) {
+                removeTyping();
+                const offlineResponse = getOfflineResponse(query);
+                addMessage(`📴 Offline Mode\n\n${offlineResponse}`, false);
+            }
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') sendQuery();
+        }
+
+        function quickQuestion(text) {
+            document.getElementById('queryInput').value = text;
+            sendQuery();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!checkAuth()) return;
+            checkOffline();
+            document.getElementById('queryInput').focus();
+        });
+    </script>
+</body>
+</html>

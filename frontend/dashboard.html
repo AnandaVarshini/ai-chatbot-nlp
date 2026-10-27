@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard - AI Study Assistant</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css?v=2" />
+</head>
+<body>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <span class="sidebar-brand">AI Study Assistant</span>
+      <button class="sidebar-toggle" type="button" onclick="toggleSidebar()" aria-label="Collapse sidebar">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <line x1="3" y1="12" x2="21" y2="12"/>
+          <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    <a href="index.html" class="new-chat-btn" style="text-decoration: none;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19"/>
+        <line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+      New chat
+    </a>
+
+    <div class="sessions-label">Recent</div>
+    <div class="sessions-list" id="sessionsList">
+      <div class="sessions-empty">No conversations yet</div>
+    </div>
+
+    <div class="sidebar-footer">
+      <button class="sidebar-link" type="button" onclick="toggleTheme()">
+        <svg id="themeIconMoon" class="toggle-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+        <svg id="themeIconSun" class="toggle-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: block;">
+          <circle cx="12" cy="12" r="4"/>
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+        </svg>
+        <span id="themeLabel">Light mode</span>
+      </button>
+
+      <a href="dashboard.html" class="sidebar-link" style="background: var(--accent-muted); color: var(--text-primary);">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="20" x2="18" y2="10"/>
+          <line x1="12" y1="20" x2="12" y2="4"/>
+          <line x1="6" y1="20" x2="6" y2="14"/>
+        </svg>
+        Dashboard
+      </a>
+
+      <a href="history.html" class="sidebar-link">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+          <path d="M3 3v5h5"/>
+          <path d="M12 7v5l4 2"/>
+        </svg>
+        History
+      </a>
+
+      <button class="sidebar-link danger" type="button" onclick="logout()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        Logout
+      </button>
+    </div>
+  </aside>
+
+  <main class="main-area">
+    <div class="top-bar">
+      <div class="top-bar-left">
+        <button class="sidebar-open-btn" type="button" onclick="toggleSidebar()" aria-label="Open sidebar">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <line x1="3" y1="12" x2="21" y2="12"/>
+            <line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+        </button>
+        <div>
+          <div class="page-title">Dashboard</div>
+          <div class="page-subtitle">Your learning statistics at a glance</div>
+        </div>
+      </div>
+      <div class="top-bar-right">
+        <span class="user-badge" id="navUsername">User</span>
+      </div>
+    </div>
+
+    <div class="dashboard-container">
+      <div class="dashboard-grid">
+        <div class="stat-card">
+          <div class="stat-label">Total Queries</div>
+          <div class="stat-value" id="totalQueries">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Answered</div>
+          <div class="stat-value" id="answeredQueries">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Unanswered</div>
+          <div class="stat-value" id="unansweredQueries">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Answer Rate</div>
+          <div class="stat-value" id="answerRate">0%</div>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-title">Top Intent Categories</div>
+        <div id="intentList">
+          <div class="history-empty">No data yet. Start chatting to see insights.</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="script.js?v=2"></script>
+  <script>
+    async function loadSessions() {
+      const userId = localStorage.getItem('userId');
+      if (!userId) return;
+      const list = document.getElementById('sessionsList');
+      if (!list) return;
+
+      try {
+        const res = await fetch(`${API_URL}/api/sessions/${userId}`);
+        const sessions = await res.json();
+        if (!sessions.length) {
+          list.innerHTML = '<div class="sessions-empty">No conversations yet</div>';
+          return;
+        }
+        list.innerHTML = '';
+        sessions.slice(0, 20).forEach((session) => {
+          const item = document.createElement('a');
+          item.className = 'session-item';
+          item.href = 'index.html';
+          item.style.textDecoration = 'none';
+
+          const title = document.createElement('span');
+          title.className = 'session-title';
+          title.textContent = session.title || 'Untitled';
+
+          item.appendChild(title);
+          item.addEventListener('click', () => {
+            localStorage.setItem('currentSessionId', session.session_id);
+          });
+          list.appendChild(item);
+        });
+      } catch (err) {
+        console.error('Load sessions failed:', err);
+      }
+    }
+
+    async function loadDashboard() {
+      const userId = localStorage.getItem('userId');
+      const token = localStorage.getItem('token');
+      try {
+        let response = await fetch(`${API_URL}/api/analytics/${userId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!response.ok) {
+          response = await fetch(`${API_URL}/api/analytics`);
+        }
+        const data = await response.json();
+        updateDashboard(data);
+      } catch (error) {
+        document.getElementById('intentList').innerHTML =
+          '<div class="history-empty">Could not load analytics.</div>';
+      }
+    }
+
+    function updateDashboard(data) {
+      const total = data.total_queries || 0;
+      const answered = data.answered_queries || 0;
+      const unanswered = data.unanswered_queries || 0;
+      const rate = total > 0 ? Math.round((answered / total) * 100) : 0;
+
+      document.getElementById('totalQueries').textContent = total;
+      document.getElementById('answeredQueries').textContent = answered;
+      document.getElementById('unansweredQueries').textContent = unanswered;
+      document.getElementById('answerRate').textContent = rate + '%';
+
+      const intents = data.top_intents || {};
+      const intentList = document.getElementById('intentList');
+      if (Object.keys(intents).length === 0) {
+        intentList.innerHTML = '<div class="history-empty">No data yet.</div>';
+        return;
+      }
+      const maxCount = Math.max(...Object.values(intents));
+      let html = '';
+      for (const [intent, count] of Object.entries(intents)) {
+        const pct = maxCount > 0 ? (count / maxCount) * 100 : 0;
+        html += `
+          <div style="display:flex; align-items:center; gap:15px; margin-bottom:12px;">
+            <span style="color:var(--text-secondary); font-size:13px; min-width:120px;">${intent}</span>
+            <div style="flex:1; height:8px; background:var(--bg-hover); border-radius:4px; overflow:hidden;">
+              <div style="height:100%; width:${pct}%; background:var(--accent); border-radius:4px;"></div>
+            </div>
+            <span style="color:var(--text-muted); font-size:13px; min-width:40px; text-align:right;">${count}</span>
+          </div>
+        `;
+      }
+      intentList.innerHTML = html;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const token = localStorage.getItem('token');
+      const username = localStorage.getItem('username');
+      if (!token) {
+        window.location.href = 'login.html';
+        return;
+      }
+      document.getElementById('navUsername').textContent = username || 'User';
+
+      if (typeof updateThemeToggleIcon === 'function') updateThemeToggleIcon();
+
+      loadSessions();
+      loadDashboard();
+    });
+  </script>
+</body>
+</html>

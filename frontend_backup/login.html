@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - AI Study Assistant</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #0a0a1a;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow: hidden;
+        }
+        #particles-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+        }
+        .auth-container {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 420px;
+        }
+        .auth-box {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            padding: 45px 40px;
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+            animation: slideUp 0.6s ease-out;
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .logo-icon {
+            text-align: center;
+            font-size: 48px;
+            margin-bottom: 10px;
+            color: #667eea;
+        }
+        .auth-box h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 26px;
+            text-align: center;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 6px;
+        }
+        .auth-box p.subtitle {
+            text-align: center;
+            color: rgba(255,255,255,0.4);
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+        .auth-box .input-group {
+            margin-bottom: 18px;
+        }
+        .auth-box .input-group label {
+            display: block;
+            color: rgba(255,255,255,0.6);
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+        .auth-box .input-group label i {
+            margin-right: 8px;
+            color: #667eea;
+        }
+        .auth-box .input-group input {
+            width: 100%;
+            padding: 14px 18px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            color: white;
+            font-size: 15px;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.3s;
+        }
+        .auth-box .input-group input:focus {
+            border-color: #667eea;
+            outline: none;
+            box-shadow: 0 0 30px rgba(102,126,234,0.1);
+        }
+        .auth-box .input-group input::placeholder {
+            color: rgba(255,255,255,0.25);
+        }
+        .auth-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            font-family: 'Poppins', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 8px;
+        }
+        .auth-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px rgba(102,126,234,0.4);
+        }
+        .auth-btn:active { transform: scale(0.97); }
+        .auth-switch {
+            text-align: center;
+            color: rgba(255,255,255,0.4);
+            font-size: 14px;
+            margin-top: 20px;
+        }
+        .auth-switch a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        .auth-switch a:hover { color: #764ba2; }
+        .error-msg {
+            color: #ff4757;
+            font-size: 13px;
+            text-align: center;
+            margin-top: 10px;
+            display: none;
+            background: rgba(255,71,87,0.1);
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,71,87,0.2);
+        }
+        .success-msg {
+            color: #00ff88;
+            font-size: 13px;
+            text-align: center;
+            margin-top: 10px;
+            display: none;
+            background: rgba(0,255,136,0.1);
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(0,255,136,0.2);
+        }
+        #registerContainer { display: none; }
+        @media (max-width: 480px) {
+            .auth-box { padding: 30px 20px; }
+            .auth-box h1 { font-size: 22px; }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="particles-canvas"></canvas>
+
+    <!-- LOGIN -->
+    <div class="auth-container" id="loginContainer">
+        <div class="auth-box">
+            <div class="logo-icon"><i class="fas fa-robot"></i></div>
+            <h1>AI Study Assistant</h1>
+            <p class="subtitle">Sign in to continue learning</p>
+            <div id="loginError" class="error-msg"></div>
+            <div id="loginSuccess" class="success-msg"></div>
+            <div class="input-group">
+                <label><i class="fas fa-user"></i> Username</label>
+                <input type="text" id="loginUsername" placeholder="Enter your username" />
+            </div>
+            <div class="input-group">
+                <label><i class="fas fa-lock"></i> Password</label>
+                <input type="password" id="loginPassword" placeholder="Enter your password" onkeypress="if(event.key==='Enter') login()" />
+            </div>
+            <button class="auth-btn" onclick="login()"><i class="fas fa-sign-in-alt"></i> Sign In</button>
+            <div class="auth-switch">Don't have an account? <a onclick="showRegister()">Sign Up</a></div>
+        </div>
+    </div>
+
+    <!-- REGISTER -->
+    <div class="auth-container" id="registerContainer">
+        <div class="auth-box">
+            <div class="logo-icon"><i class="fas fa-user-plus"></i></div>
+            <h1>Create Account</h1>
+            <p class="subtitle">Start your AI learning journey</p>
+            <div id="registerError" class="error-msg"></div>
+            <div id="registerSuccess" class="success-msg"></div>
+            <div class="input-group">
+                <label><i class="fas fa-user"></i> Username</label>
+                <input type="text" id="regUsername" placeholder="Choose a username" />
+            </div>
+            <div class="input-group">
+                <label><i class="fas fa-envelope"></i> Email</label>
+                <input type="email" id="regEmail" placeholder="Enter your email" />
+            </div>
+            <div class="input-group">
+                <label><i class="fas fa-lock"></i> Password</label>
+                <input type="password" id="regPassword" placeholder="Create a password (min 6 chars)" />
+            </div>
+            <button class="auth-btn" onclick="register()"><i class="fas fa-user-plus"></i> Create Account</button>
+            <div class="auth-switch">Already have an account? <a onclick="showLogin()">Sign In</a></div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://127.0.0.1:8080';
+
+        // ===== PARTICLES =====
+        const canvas = document.getElementById('particles-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 1;
+                this.speedX = (Math.random() - 0.5) * 0.5;
+                this.speedY = (Math.random() - 0.5) * 0.5;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x > canvas.width) this.x = 0;
+                if (this.x < 0) this.x = canvas.width;
+                if (this.y > canvas.height) this.y = 0;
+                if (this.y < 0) this.y = canvas.height;
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(102, 126, 234, 0.5)';
+                ctx.fill();
+            }
+        }
+        for (let i = 0; i < 100; i++) particles.push(new Particle());
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => { p.update(); p.draw(); });
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < 150) {
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.strokeStyle = `rgba(102, 126, 234, ${0.1 * (1 - dist / 150)})`;
+                        ctx.lineWidth = 1;
+                        ctx.stroke();
+                    }
+                }
+            }
+            requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
+
+        // ===== AUTH =====
+        function showRegister() {
+            document.getElementById('loginContainer').style.display = 'none';
+            document.getElementById('registerContainer').style.display = 'block';
+            document.getElementById('registerError').style.display = 'none';
+            document.getElementById('registerSuccess').style.display = 'none';
+        }
+        function showLogin() {
+            document.getElementById('registerContainer').style.display = 'none';
+            document.getElementById('loginContainer').style.display = 'block';
+            document.getElementById('loginError').style.display = 'none';
+            document.getElementById('loginSuccess').style.display = 'none';
+        }
+
+        async function login() {
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+            const errorEl = document.getElementById('loginError');
+            const successEl = document.getElementById('loginSuccess');
+            errorEl.style.display = 'none';
+            successEl.style.display = 'none';
+            if (!username || !password) {
+                errorEl.style.display = 'block';
+                errorEl.textContent = 'Please enter username and password';
+                return;
+            }
+            try {
+                const response = await fetch(`${API_URL}/api/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    localStorage.setItem('token', data.access_token);
+                    localStorage.setItem('userId', data.user_id);
+                    localStorage.setItem('username', data.username);
+                    localStorage.setItem('email', data.email);
+                    successEl.style.display = 'block';
+                    successEl.textContent = 'Login successful! Redirecting...';
+                    setTimeout(() => { window.location.href = 'index.html'; }, 500);
+                } else {
+                    errorEl.style.display = 'block';
+                    errorEl.textContent = data.detail || 'Login failed';
+                }
+            } catch (error) {
+                errorEl.style.display = 'block';
+                errorEl.textContent = 'Could not connect to server. Make sure backend is running.';
+            }
+        }
+
+        async function register() {
+            const username = document.getElementById('regUsername').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const password = document.getElementById('regPassword').value.trim();
+            const errorEl = document.getElementById('registerError');
+            const successEl = document.getElementById('registerSuccess');
+            errorEl.style.display = 'none';
+            successEl.style.display = 'none';
+            if (!username || !email || !password) {
+                errorEl.style.display = 'block';
+                errorEl.textContent = 'Please fill all fields';
+                return;
+            }
+            if (password.length < 6) {
+                errorEl.style.display = 'block';
+                errorEl.textContent = 'Password must be at least 6 characters';
+                return;
+            }
+            try {
+                const response = await fetch(`${API_URL}/api/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, email, password })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    localStorage.setItem('token', data.access_token);
+                    localStorage.setItem('userId', data.user_id);
+                    localStorage.setItem('username', data.username);
+                    localStorage.setItem('email', data.email);
+                    successEl.style.display = 'block';
+                    successEl.textContent = 'Account created! Redirecting...';
+                    setTimeout(() => { window.location.href = 'index.html'; }, 500);
+                } else {
+                    errorEl.style.display = 'block';
+                    errorEl.textContent = data.detail || 'Registration failed';
+                }
+            } catch (error) {
+                errorEl.style.display = 'block';
+                errorEl.textContent = 'Could not connect to server. Make sure backend is running.';
+            }
+        }
+
+        // Enter key support
+        document.getElementById('regPassword').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') register();
+        });
+
+        // Check if already logged in
+        if (localStorage.getItem('token')) {
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>
